@@ -1,0 +1,98 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: infra-only-template
+  title: Infrastructure Only Template
+  description: Template for creating infrastructure-only components with no application code
+  tags:
+    - recommended
+    - terraform
+    - infrastructure
+spec:
+  owner: platform-engineering
+  type: service
+  
+  parameters:
+    - title: Infrastructure Information
+      required:
+        - name
+        - description
+        - owner
+        - repoUrl
+      properties:
+        name:
+          title: Infrastructure Name
+          type: string
+          description: Unique name of the infrastructure component
+          minLength: 1
+          maxLength: 60
+          pattern: '^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$'
+        description:
+          title: Infrastructure Description
+          type: string
+          description: Brief description of the infrastructure component
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the infrastructure (user or group)
+        repoUrl:
+          title: Repository Location
+          type: string
+          description: Choose a location to create the repository
+          ui:field: RepoUrlPicker
+          ui-options:
+            allowedHosts:
+              - github.com
+        environment:
+          title: Target Environment
+          type: string
+          enum:
+            - dev
+            - staging
+            - prod
+          default: dev
+          description: Environment where infrastructure will be deployed
+        region:
+          title: AWS Region
+          type: string
+          default: us-east-1
+          description: AWS region for the infrastructure
+        vpcCidr:
+          title: VPC CIDR Block
+          type: string
+          default: "10.0.0.0/16"
+          description: CIDR block for the VPC (if applicable)
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./template-content
+        values:
+          name: '{{ inputs.name }}'
+          description: '{{ inputs.description }}'
+          owner: '{{ inputs.owner }}'
+          environment: '{{ inputs.environment }}'
+          region: '{{ inputs.region }}'
+          vpcCidr: '{{ inputs.vpcCidr }}'
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: '{{ inputs.description }}'
+        repoUrl: '{{ inputs.repoUrl }}'
+        defaultBranch: main
+
+    - id: register
+      name: Register Entity
+      action: catalog:register
+      input:
+        repoContentsUrl: '{{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    remoteUrl: '{{ steps.publish.output.remoteUrl }}'
+    catalogEntityUrl: '{{ steps.register.output.entityRef }}'

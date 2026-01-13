@@ -1,0 +1,148 @@
+# App configuration for the Backstage instance
+
+app:
+  title: Internal Developer Platform
+  baseUrl: ${BACKSTAGE_FRONTEND_URL}
+
+organization:
+  name: Your Company Name
+
+backend:
+  # Used for enabling authentication, secret masks, etc.
+  baseUrl: ${BACKSTAGE_BACKEND_URL}
+  listen:
+    port: 7007
+    host: 0.0.0.0
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+    img-src: ["'self'", 'data:', 'http:', 'https:']
+  cors:
+    origin: http://localhost:3000
+    credentials: true
+  database:
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+  cache:
+    store: 'memory'
+    memory:
+      ttl: 60000
+  # Used for secret masks
+  # See https://backstage.io/docs/auth/service-accounts#creating-a-token
+  auth:
+    keys:
+      - secret: ${BACKEND_SECRET}
+
+# Enables the frontend to reach the backend's auth functionality
+auth:
+  environment: development
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location]
+  locations:
+    - type: url
+      target: https://github.com/leketech/internal-developer-platform/blob/main/backstage/catalog-info.yaml
+
+proxy:
+  endpoints:
+    '/aws':
+      target: 'https://sts.us-east-1.amazonaws.com'
+      changeOrigin: true
+    '/kubernetes':
+      target: 'https://kubernetes.default.svc.cluster.local'
+      changeOrigin: true
+      headers:
+        'Authorization': 'Bearer ${KUBERNETES_TOKEN}'
+    '/argo':
+      target: 'https://argocd.platform.internal'
+      changeOrigin: true
+      headers:
+        'Authorization': 'Bearer ${ARGOCD_TOKEN}'
+
+# Enables software templates to be created in the UI
+scaffolder:
+  # see https://backstage.io/docs/features/software-templates/configuration for software template options
+  backstage:
+    allowedLocation: []
+  
+
+# Provides authentication strategies for the frontend
+# see https://backstage.io/docs/auth/ for information
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'docker'
+  publisher:
+    type: 'awsS3'
+    awsS3:
+      bucketName: 'backstage-techdocs'
+      region: 'us-east-1'
+
+kubernetes:
+  serviceLocatorMethod:
+    type: 'multiTenant'
+  clusterLocatorMethods:
+    - type: 'config'
+      clusters:
+        - url: ${KUBERNETES_CLUSTER_URL}
+          name: dev-cluster
+          authProvider: 'serviceAccount'
+          skipTLSVerify: false
+          caData: '${KUBERNETES_CLUSTER_CA_DATA}'
+          token: '${KUBERNETES_TOKEN}'
+        - url: ${KUBERNETES_STAGING_CLUSTER_URL}
+          name: staging-cluster
+          authProvider: 'serviceAccount'
+          skipTLSVerify: false
+          caData: '${KUBERNETES_STAGING_CLUSTER_CA_DATA}'
+          token: '${KUBERNETES_STAGING_TOKEN}'
+        - url: ${KUBERNETES_PROD_CLUSTER_URL}
+          name: prod-cluster
+          authProvider: 'serviceAccount'
+          skipTLSVerify: false
+          caData: '${KUBERNETES_PROD_CLUSTER_CA_DATA}'
+          token: '${KUBERNETES_PROD_TOKEN}'
+
+argocd:
+  appLocatorMethods:
+    - type: 'config'
+      instances:
+        - name: argo-instance-dev
+          url: https://argocd-dev.platform.internal
+          token: '${ARGOCD_DEV_TOKEN}'
+        - name: argo-instance-staging
+          url: https://argocd-staging.platform.internal
+          token: '${ARGOCD_STAGING_TOKEN}'
+        - name: argo-instance-prod
+          url: https://argocd-prod.platform.internal
+          token: '${ARGOCD_PROD_TOKEN}'
+
+rbac:
+  admin:
+    groups:
+      - group:azuread:platform-admins
+  permission:
+    enabled: true
+
+costInsights:
+  engineerCost: 250000
+  currency: USD
+  api:
+    baseUrl: 'https://api.cost-insights.internal'
+    token: '${COST_INSIGHTS_API_TOKEN}'
+
+aws:
+  accounts:
+    - accountId: '${AWS_ACCOUNT_ID}'
+      roleName: '${AWS_ROLE_NAME}'
+      adminUsername: '${AWS_ADMIN_USERNAME}'
+      partition: 'aws'
+      keyArn: '${AWS_KMS_KEY_ARN}'

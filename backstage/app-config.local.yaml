@@ -1,0 +1,58 @@
+# Local development configuration for Backstage
+# This file should only be used for local development
+
+app:
+  title: Internal Developer Platform (Local)
+  baseUrl: http://localhost:3000
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+    host: 0.0.0.0
+
+# Enables the frontend to reach the backend's auth functionality
+auth:
+  environment: development
+  providers:
+    guest:
+      dangerouslyAllowOutsideDevelopment: true
+
+# Provides authentication strategies for the frontend
+# see https://backstage.io/docs/auth/ for information
+signInPage: 'http://localhost:3000/api/auth/guest/handle-login'
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'docker'
+  publisher:
+    type: 'local'
+    store:
+      root: /tmp/techdocs
+
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+    pullRequestBranchName: backstage-integration
+  rules:
+    - allow: [Component, System, API, Resource, Location]
+  locations:
+    # Local example data for development
+    - type: file
+      target: ../../examples/entities.yaml
+    # Local example template
+    - type: file
+      target: ../../examples/template/template.yaml
+      rules:
+        - allow: [Template]
+
+cache:
+  store: memory
+
+rbac:
+  admin:
+    users:
+      - name: user:default/guest
+  permission:
+    enabled: true
