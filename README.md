@@ -1,6 +1,7 @@
 # Internal Developer Platform (IDP)
 
 Overview
+![image alt](https://github.com/leketech/internal-developer-platform/blob/ae6503d25c2a84fb781246d2e6a5cf7a27f1277a/idp%20enterprize.png)
 
 This repository contains a production-grade Internal Developer Platform (IDP) designed to improve developer velocity while enforcing security, reliability, and operational standards by default.
 
