@@ -59,3 +59,28 @@ The platform enables self-service provisioning, GitOps-based delivery, and polic
 ## 🧠 Why This Matters
 
 This platform treats infrastructure as a product, not a ticket queue — enabling teams to ship faster while reducing operational risk.
+
+## 📁 Project Structure
+
+```
+internal-developer-platform/
+├── .github/
+│   └── workflows/
+│       ├── app-ci.yaml
+│       ├── security.yaml
+│       └── terraform.yaml
+├── backstage/
+│   ├── app-config.yaml
+│   ├── catalog-info.yaml
+│   ├── techdocs/
+│   └── templates/
+├── terraform/
+│   ├── modules/
+│   └── environments/
+├── gitops/
+│   └── argocd/
+├── policies/
+│   └── opa/
+├── scripts/
+└── docs/
+```
