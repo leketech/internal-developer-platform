@@ -1,0 +1,102 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: worker-service-template
+  title: Worker Service Template
+  description: Template for creating a new worker service with standard configuration
+  tags:
+    - recommended
+    - nodejs
+    - worker
+spec:
+  owner: platform-engineering
+  type: service
+  
+  parameters:
+    - title: Service Information
+      required:
+        - name
+        - description
+        - owner
+        - repoUrl
+      properties:
+        name:
+          title: Service Name
+          type: string
+          description: Unique name of the service
+          minLength: 1
+          maxLength: 60
+          pattern: '^[a-zA-Z][a-zA-Z0-9-]*[a-zA-Z0-9]$'
+        description:
+          title: Service Description
+          type: string
+          description: Brief description of the service
+        owner:
+          title: Owner
+          type: string
+          description: Owner of the service (user or group)
+        repoUrl:
+          title: Repository Location
+          type: string
+          description: Choose a location to create the repository
+          ui:field: RepoUrlPicker
+          ui-options:
+            allowedHosts:
+              - github.com
+        dockerPort:
+          title: Docker Port
+          type: number
+          description: Port that the Docker container exposes (0 for worker services without HTTP)
+          default: 0
+        cpuLimit:
+          title: CPU Limit
+          type: string
+          description: Maximum CPU that the service can use
+          default: "250m"
+        memoryLimit:
+          title: Memory Limit
+          type: string
+          description: Maximum memory that the service can use
+          default: "256Mi"
+        replicas:
+          title: Number of Replicas
+          type: number
+          description: Number of pod replicas for the worker service
+          default: 1
+          minimum: 1
+          maximum: 10
+
+  steps:
+    - id: fetch-base
+      name: Fetch Base Template
+      action: fetch:template
+      input:
+        url: ./template-content
+        values:
+          name: '{{ inputs.name }}'
+          description: '{{ inputs.description }}'
+          owner: '{{ inputs.owner }}'
+          dockerPort: '{{ inputs.dockerPort }}'
+          cpuLimit: '{{ inputs.cpuLimit }}'
+          memoryLimit: '{{ inputs.memoryLimit }}'
+          replicas: '{{ inputs.replicas }}'
+
+    - id: publish
+      name: Publish
+      action: publish:github
+      input:
+        allowedHosts: ['github.com']
+        description: '{{ inputs.description }}'
+        repoUrl: '{{ inputs.repoUrl }}'
+        defaultBranch: main
+
+    - id: register
+      name: Register Entity
+      action: catalog:register
+      input:
+        repoContentsUrl: '{{ steps.publish.output.repoContentsUrl }}'
+        catalogInfoPath: '/catalog-info.yaml'
+
+  output:
+    remoteUrl: '{{ steps.publish.output.remoteUrl }}'
+    catalogEntityUrl: '{{ steps.register.output.entityRef }}'

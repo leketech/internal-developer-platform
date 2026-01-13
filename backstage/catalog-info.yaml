@@ -1,0 +1,141 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: internal-developer-platform
+  description: The Internal Developer Platform that enables self-service provisioning, GitOps-based delivery, and policy-driven governance
+  tags:
+    - platform
+    - kubernetes
+    - backstage
+    - terraform
+    - argocd
+  annotations:
+    github.com/project-slug: leketech/internal-developer-platform
+    backstage.io/techdocs-ref: dir:.
+    argocd/app-name: idp-backstage
+spec:
+  type: service
+  owner: platform-engineering
+  lifecycle: production
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: terraform-platform-modules
+  description: Reusable Terraform modules for infrastructure provisioning
+  tags:
+    - infrastructure
+    - terraform
+    - iac
+    - aws
+spec:
+  type: library
+  owner: platform-engineering
+  lifecycle: production
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: argocd-gitops-pipelines
+  description: GitOps pipelines for continuous delivery
+  tags:
+    - gitops
+    - argocd
+    - cd
+    - kubernetes
+spec:
+  type: service
+  owner: platform-engineering
+  lifecycle: production
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: github-actions-workflows
+  description: CI/CD workflows for automated testing and deployment
+  tags:
+    - ci
+    - cd
+    - github-actions
+    - automation
+spec:
+  type: template
+  owner: platform-engineering
+  lifecycle: production
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: internal-developer-platform
+  description: The complete Internal Developer Platform ecosystem
+  tags:
+    - platform
+    - self-service
+    - governance
+spec:
+  owner: platform-engineering
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: platform-engineering
+  description: Domain for all platform engineering related components
+  tags:
+    - platform
+    - infrastructure
+spec:
+  owner: platform-engineering
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-template-backend-service
+  description: Template for creating new backend services
+  tags:
+    - template
+    - backend
+    - service
+spec:
+  type: template
+  owner: platform-engineering
+  lifecycle: production
+  system: internal-developer-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-template-worker-service
+  description: Template for creating new worker services
+  tags:
+    - template
+    - worker
+    - service
+spec:
+  type: template
+  owner: platform-engineering
+  lifecycle: production
+  system: internal-developer-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage-template-infra-only
+  description: Template for creating infrastructure-only components
+  tags:
+    - template
+    - infrastructure
+    - iac
+spec:
+  type: template
+  owner: platform-engineering
+  lifecycle: production
+  system: internal-developer-platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-engineering-team
+  description: The team responsible for maintaining the Internal Developer Platform
+spec:
+  type: team
+  children: []

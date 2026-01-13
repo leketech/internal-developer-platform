@@ -1,0 +1,42 @@
+apiVersion: argoproj.io/v1alpha1
+kind: AppProject
+metadata:
+  name: idp-project
+  namespace: argocd
+spec:
+  description: Internal Developer Platform Project
+  sourceRepos:
+  - https://github.com/leketech/internal-developer-platform.git
+  destinations:
+  - namespace: '*'
+    server: https://kubernetes.default.svc
+  clusterResourceWhitelist:
+  - group: '*'
+    kind: '*'
+  namespaceResourceBlacklist:
+  - group: ''
+    kind: ResourceQuota
+  - group: ''
+    kind: LimitRange
+  - group: ''
+    kind: NetworkPolicy
+  orphanedResources:
+    warn: false
+  roles:
+  - name: developers
+    policies:
+    - p, proj:idp-project:developers, applications, get, idp-project/*, allow
+    - p, proj:idp-project:developers, applications, create, idp-project/*, allow
+    - p, proj:idp-project:developers, applications, update, idp-project/*, allow
+    - p, proj:idp-project:developers, applications, delete, idp-project/*, allow
+    - p, proj:idp-project:developers, applications, sync, idp-project/*, allow
+    - p, proj:idp-project:developers, applications, override, idp-project/*, allow
+    groups:
+    - developers
+  - name: admins
+    policies:
+    - p, proj:idp-project:admins, applications, *, idp-project/*, allow
+    - p, proj:idp-project:admins, repositories, *, *, allow
+    - p, proj:idp-project:admins, clusters, *, *, allow
+    groups:
+    - platform-admins
